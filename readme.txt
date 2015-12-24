@@ -1,0 +1,1 @@
+Editable table used for client-database interactions.
