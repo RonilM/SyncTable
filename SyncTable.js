@@ -16,6 +16,7 @@ var SyncTable = function (initVar) {
 
 	SyncTable.prototype.init = function() {
 		checkCompulsaryInputs();
+		purgeTrackerVariables();
 		var getDataPromise = this.getData();
 		var currentInstance = this;
 		$.when(getDataPromise).done(function (tdata) {
@@ -183,6 +184,8 @@ var SyncTable = function (initVar) {
 
 	var issueSaveChangesRequest = function(){
 		console.log(changedRowTracker);
+		console.log(deletedRowTracker);
+		//TODO: Add logic to send update and delete requests to updateDataURL & deleteDataURL
 		currentInstance.init();
 	}
 
@@ -197,12 +200,18 @@ var SyncTable = function (initVar) {
 
 		reloadButton.addEventListener("click",function(event){
 			issueReloadRequest();
+			
 		});
 
 	}
 
 	var checkCompulsaryInputs = function(){
 		//TODO: check whether the user passes values of compulsary variables (divID,header,getDataURL,updateDataURL,deleteDataURL,PrimaryKeyColumnIndex,PrimaryKeyVisible);
+	}
+
+	var purgeTrackerVariables = function(){
+			changedRowTracker = {};
+	 		deletedRowTracker = {};
 	}
 
 }

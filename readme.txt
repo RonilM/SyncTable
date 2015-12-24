@@ -1,4 +1,8 @@
-Editable table used for client-database interactions.
+
+Desc: Editable table used for client-database interactions.
+
+
+Dependencies: bootstrap-3.3.6 (or higher), jquery-1.11.3 (or higher)
 
 
 Usage:
