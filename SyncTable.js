@@ -1,6 +1,7 @@
 
 
 var SyncTable = function (initVar) {
+	var currentInstance = this;
 	var divID = initVar.divID;
 	var header = initVar.header;
 	var data;// = initVar.data;
@@ -25,8 +26,9 @@ var SyncTable = function (initVar) {
 
 
 	SyncTable.prototype.createTable = function() {
-		this.checkValidity();
+		checkValidity();
 		var mainDiv = document.getElementById(divID);
+		mainDiv.innerHTML = "";
 		mainDiv.className = mainDiv.className + " panel panel-info";
 		var table = document.createElement("table");
 		var subDiv = document.createElement("div");
@@ -46,6 +48,7 @@ var SyncTable = function (initVar) {
 		mainDiv.appendChild(subDiv);
 		mainDiv.appendChild(table);
 
+		createListenersForButtons(saveChangesButton,reloadButton);
 
 		var thead = document.createElement("thead");
 		var tr = document.createElement("tr");
@@ -148,7 +151,7 @@ var SyncTable = function (initVar) {
 		console.log(xhr);
 	}
 
-	SyncTable.prototype.checkValidity = function(){
+	var checkValidity = function(){
 		if(data == null || data.length == 0){
 			console.log("[Warning] No Data!");
 			return;
@@ -174,6 +177,26 @@ var SyncTable = function (initVar) {
 
 		var childTdList = row.childNodes;
 		return childTdList[PrimaryKeyColumnIndex].childNodes[0].value;
+
+	}
+
+	var issueSaveChangesRequest = function(){
+		console.log(changedRowTracker);
+		currentInstance.init();
+	}
+
+	var issueReloadRequest = function(){
+		currentInstance.init();
+	}	
+
+	var createListenersForButtons = function(saveChangesButton,reloadButton){
+		saveChangesButton.addEventListener("click",function(event){
+			issueSaveChangesRequest();
+		});
+
+		reloadButton.addEventListener("click",function(event){
+			issueReloadRequest();
+		});
 
 	}
 
