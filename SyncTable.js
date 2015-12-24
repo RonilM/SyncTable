@@ -15,6 +15,7 @@ var SyncTable = function (initVar) {
 	var deletedRowTracker = {};
 
 	SyncTable.prototype.init = function() {
+		checkCompulsaryInputs();
 		var getDataPromise = this.getData();
 		var currentInstance = this;
 		$.when(getDataPromise).done(function (tdata) {
@@ -198,6 +199,10 @@ var SyncTable = function (initVar) {
 			issueReloadRequest();
 		});
 
+	}
+
+	var checkCompulsaryInputs = function(){
+		//TODO: check whether the user passes values of compulsary variables (divID,header,getDataURL,updateDataURL,deleteDataURL,PrimaryKeyColumnIndex,PrimaryKeyVisible);
 	}
 
 }
