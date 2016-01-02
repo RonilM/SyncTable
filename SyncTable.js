@@ -1,4 +1,7 @@
 
+// ****************** Created By Ronil Mehta ****************** \\
+
+
 
 var SyncTable = function (initVar) {
 	var currentInstance = this;
@@ -15,9 +18,9 @@ var SyncTable = function (initVar) {
 	var deletedRowTracker = {};
 
 	SyncTable.prototype.init = function() {
-		checkCompulsaryInputs();
+		checkCompulsaryInputsAndSetDefaultValues();
 		purgeTrackerVariables();
-		var getDataPromise = this.getData();
+		var getDataPromise = getData();
 		var currentInstance = this;
 		$.when(getDataPromise).done(function (tdata) {
             data = tdata;
@@ -144,12 +147,43 @@ var SyncTable = function (initVar) {
 	}
 
 
-	SyncTable.prototype.getData = function(){
+	var getData = function(){
 		var currentInstance = this;
-		return $.ajax({ url: getDataURL, type: "get", error: currentInstance.errorFunc  });
+		return $.ajax({ url: getDataURL, type: "get", error: errorHandlerForUnsuccessfulGet  });
+	}
+	var updateData = function(){
+		var currentInstance = this;
+		console.log("Implement updateData()");
+		//TODO: add logic to convert row tuples in UpdateTracker variable to JSON objects and then send  {id1:rowObject1,id2:rowObject2 .....}  object to server
+		//return $.ajax({ url: UpdateDataURL, type: "get", error: errorHandlerForUnsuccessfulUpdate  });
+	}
+	var deleteData = function(){
+		var currentInstance = this;
+		console.log("Implement deleteData()");
+		//TODO: add logic to convert row tuples in DeleteTracker variable to JSON objects and then send  {id1:rowObject1,id2:rowObject2 .....}  object to server
+		//return $.ajax({ url: deleteDataURL, type: "get", error: errorHandlerForUnsuccessfulDelete  });
 	}
 
-	SyncTable.prototype.errorFunc = function (xhr, errorType, exception) {
+
+	var errorFunc = function (xhr, errorType, exception) {
+		console.log(xhr);
+	}
+
+	var errorHandlerForUnsuccessfulGet = function (xhr, errorType, exception) {
+		console.log("Implement errorHandlerForUnsuccessfulGet()");
+		//TODO: Add actions for Unsuccessful get
+		console.log(xhr);
+	}
+
+	var errorHandlerForUnsuccessfulUpdate = function (xhr, errorType, exception) {
+		console.log("Implement errorHandlerForUnsuccessfulUpdate()");
+		//TODO: Add actions for Unsuccessful Update (Remeber to add currentInstance.init(); in the end)
+		console.log(xhr);
+	}
+
+	var errorHandlerForUnsuccessfulDelete = function (xhr, errorType, exception) {
+		console.log("Implement errorHandlerForUnsuccessfulDelete()");
+		//TODO: add actions for Unsuccessful Delete (Remember to add currentInstance.init(); in the end)
 		console.log(xhr);
 	}
 
@@ -186,7 +220,13 @@ var SyncTable = function (initVar) {
 		console.log(changedRowTracker);
 		console.log(deletedRowTracker);
 		//TODO: Add logic to send update and delete requests to updateDataURL & deleteDataURL
-		currentInstance.init();
+		var updateDataPromise = updateData();
+		var deleteDataPromise = deleteData();
+		$when(updateDataPromise,deleteDataPromise).done(function(updateDataResponse,deleteDataResponse){
+			//Todo: Add actions for event when Updates are successful
+			//Todo: Add actions for event when  deletes are successful
+			currentInstance.init();
+		});
 	}
 
 	var issueReloadRequest = function(){
@@ -205,7 +245,7 @@ var SyncTable = function (initVar) {
 
 	}
 
-	var checkCompulsaryInputs = function(){
+	var checkCompulsaryInputsAndSetDefaultValues = function(){
 		//TODO: check whether the user passes values of compulsary variables (divID,header,getDataURL,updateDataURL,deleteDataURL,PrimaryKeyColumnIndex,PrimaryKeyVisible);
 	}
 
