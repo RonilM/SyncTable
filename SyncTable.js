@@ -39,6 +39,7 @@ var SyncTable = function (initVar) {
 	var PrimaryKeyVisible = initVar.PrimaryKeyVisible;
 	var changedRowTracker = {};
 	var deletedRowTracker = {};
+	var inputType = initVar.inputType;
 	var table;
 
 	SyncTable.prototype.init = function() {
@@ -169,7 +170,7 @@ var SyncTable = function (initVar) {
 		//TODO: Add logic to send update and delete requests to updateDataURL & deleteDataURL
 		var updateDataPromise = updateData();
 		var deleteDataPromise = deleteData();
-		$when(updateDataPromise,deleteDataPromise).done(function(updateDataResponse,deleteDataResponse){
+		$.when(updateDataPromise,deleteDataPromise).done(function(updateDataResponse,deleteDataResponse){
 			//Todo: Add actions for event when Updates are successful
 			//Todo: Add actions for event when  deletes are successful
 			currentInstance.init();
@@ -231,7 +232,7 @@ var SyncTable = function (initVar) {
 				if(i == PrimaryKeyColumnIndex && PrimaryKeyVisible == false){
 					continue;
 				}
-				createAndAppendTextBoxCell(data[d][i],tr);
+				createAndAppendTextBoxCell(data[d][i],tr,i);
 
 			}
 
@@ -239,14 +240,14 @@ var SyncTable = function (initVar) {
 		}
 	}
 
-	var createAndAppendTextBoxCell = function(currentData,currentTr){
+	var createAndAppendTextBoxCell = function(currentData,currentTr,dataTupleIndex){
 		var td = document.createElement("td");
 		var text = document.createElement("input");
 		text.setAttribute("type","input");
 		td.appendChild(text);
 		text.setAttribute("readonly",true);
 
-		if(i != PrimaryKeyColumnIndex){
+		if(dataTupleIndex != PrimaryKeyColumnIndex){
 
 			text.addEventListener("click",function(event){
 				this.removeAttribute("readonly");
