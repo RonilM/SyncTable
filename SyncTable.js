@@ -1,3 +1,26 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2016 Ronil Vinod Mehta
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 // ****************** Created By Ronil Mehta ****************** \\
 
@@ -16,6 +39,7 @@ var SyncTable = function (initVar) {
 	var PrimaryKeyVisible = initVar.PrimaryKeyVisible;
 	var changedRowTracker = {};
 	var deletedRowTracker = {};
+	var table;
 
 	SyncTable.prototype.init = function() {
 		checkCompulsaryInputsAndSetDefaultValues();
@@ -35,14 +59,19 @@ var SyncTable = function (initVar) {
 		var mainDiv = document.getElementById(divID);
 		mainDiv.innerHTML = "";
 		mainDiv.className = mainDiv.className + " panel panel-info";
-		var table = document.createElement("table");
+
+		table = document.createElement("table");
+
 		var subDiv = document.createElement("div");
 		subDiv.className = "panel-heading";
+
 		var btnGrpDiv = document.createElement("div");
 		btnGrpDiv.className = btnGrpDiv.className + " btn-group";
+
 		var saveChangesButton = document.createElement("button");
 		saveChangesButton.innerHTML = "Save Changes";
 		saveChangesButton.className = "btn btn-default";
+
 		var reloadButton = document.createElement("button");
 		reloadButton.innerHTML = "Reload";
 		reloadButton.className = "btn btn-default";
@@ -55,90 +84,8 @@ var SyncTable = function (initVar) {
 
 		createListenersForButtons(saveChangesButton,reloadButton);
 
-		var thead = document.createElement("thead");
-		var tr = document.createElement("tr");
-		thead.appendChild(tr);
-		table.appendChild(thead);
-		for(var i in header) {
-			if(i == PrimaryKeyColumnIndex && PrimaryKeyVisible == false){
-				continue;
-			}
-			var th = document.createElement("th");
-			th.appendChild(document.createTextNode(header[i]));
-			tr.appendChild(th);
-		}
-		var th = document.createElement("th");
-		//var spanElement = document.createElement("span");
-		th.appendChild(document.createTextNode("Actions"));
-		tr.appendChild(th);
-
-
-
-		var tbody = document.createElement("tbody");
-		table.appendChild(tbody);
-		for(var d in data){
-			var tr = document.createElement("tr");
-			tbody.appendChild(tr);
-			for(var i in data[d]) {
-
-				if(i == PrimaryKeyColumnIndex && PrimaryKeyVisible == false){
-					continue;
-				}
-				var td = document.createElement("td");
-				var text = document.createElement("input");
-				text.setAttribute("type","input");
-				td.appendChild(text);
-				text.setAttribute("readonly",true);
-
-				if(i != PrimaryKeyColumnIndex){
-
-					text.addEventListener("click",function(event){
-						this.removeAttribute("readonly");
-					});
-
-
-					text.addEventListener("change",function(event){
-						//this.parentNode().paren;
-						var tRow = this;
-						tRow = getParentTR(tRow);
-						if(tRow == null)
-							return;
-						tRow.className = tRow.className + " success";
-						//changedRowTracker.push(tRow);
-						changedRowTracker[getRowId(tRow)] = tRow;
-						console.log(changedRowTracker);
-					});
-
-					text.addEventListener("blur",function(){
-						this.setAttribute("readonly",true);	
-					});
-					//td.setAttribute("onchange","alert();");
-
-				}
-				text.setAttribute("value",data[d][i]);
-				tr.appendChild(td);
-			}
-			var td = document.createElement("td");
-			//var applySpan = document.createElement("span");
-			//applySpan.className = "glyphicon glyphicon-ok";
-			//applySpan.setAttribute();
-			var deleteSpan = document.createElement("span");
-			deleteSpan.className = "glyphicon glyphicon-trash";
-			deleteSpan.addEventListener("click",function(event){
-				var tRow = this;
-				tRow = getParentTR(tRow);
-				if(tRow == null)
-					return;
-				tRow.className = tRow.className + " danger";
-				//deletedRowTracker.push(tRow);
-				deletedRowTracker[getRowId(tRow)] = tRow;
-				console.log(deletedRowTracker);
-			});
-			//td.appendChild(applySpan);
-			td.appendChild(document.createTextNode("  "));
-			td.appendChild(deleteSpan);
-			tr.appendChild(td);
-		}
+		createTableHead();
+		createTableBody();
 
 		for(var i in tableClassList){
 			table.className = table.className + " " + tableClassList[i];
@@ -252,6 +199,100 @@ var SyncTable = function (initVar) {
 	var purgeTrackerVariables = function(){
 			changedRowTracker = {};
 	 		deletedRowTracker = {};
+	}
+
+	var createTableHead = function(){
+		var thead = document.createElement("thead");
+		var tr = document.createElement("tr");
+		thead.appendChild(tr);
+		table.appendChild(thead);
+		for(var i in header) {
+			if(i == PrimaryKeyColumnIndex && PrimaryKeyVisible == false){
+				continue;
+			}
+			var th = document.createElement("th");
+			th.appendChild(document.createTextNode(header[i]));
+			tr.appendChild(th);
+		}
+		var th = document.createElement("th");
+		//var spanElement = document.createElement("span");
+		th.appendChild(document.createTextNode("Actions"));
+		tr.appendChild(th);
+	}
+
+	var createTableBody = function(){
+		var tbody = document.createElement("tbody");
+		table.appendChild(tbody);
+		for(var d in data){
+			var tr = document.createElement("tr");
+			tbody.appendChild(tr);
+			for(var i in data[d]) {
+
+				if(i == PrimaryKeyColumnIndex && PrimaryKeyVisible == false){
+					continue;
+				}
+				createAndAppendTextBoxCell(data[d][i],tr);
+
+			}
+
+			createAndAppendActionCell(tr);
+		}
+	}
+
+	var createAndAppendTextBoxCell = function(currentData,currentTr){
+		var td = document.createElement("td");
+		var text = document.createElement("input");
+		text.setAttribute("type","input");
+		td.appendChild(text);
+		text.setAttribute("readonly",true);
+
+		if(i != PrimaryKeyColumnIndex){
+
+			text.addEventListener("click",function(event){
+				this.removeAttribute("readonly");
+			});
+
+
+			text.addEventListener("change",function(event){
+				//this.parentNode().paren;
+				var tRow = this;
+				tRow = getParentTR(tRow);
+				if(tRow == null)
+					return;
+				tRow.className = tRow.className + " success";
+				//changedRowTracker.push(tRow);
+				changedRowTracker[getRowId(tRow)] = tRow;
+				console.log(changedRowTracker);
+			});
+
+			text.addEventListener("blur",function(){
+				this.setAttribute("readonly",true);	
+			});
+			//td.setAttribute("onchange","alert();");
+
+		}
+		text.setAttribute("value",currentData);
+		currentTr.appendChild(td);
+	}
+
+	var createAndAppendActionCell = function(currentTR){
+		var td = document.createElement("td");
+			var deleteSpan = document.createElement("span");
+			deleteSpan.className = "glyphicon glyphicon-trash";
+			deleteSpan.addEventListener("click",function(event){
+				var tRow = this;
+				tRow = getParentTR(tRow);
+				if(tRow == null)
+					return;
+				tRow.className = tRow.className + " danger";
+				//deletedRowTracker.push(tRow);
+				deletedRowTracker[getRowId(tRow)] = tRow;
+				console.log(deletedRowTracker);
+			});
+			//td.appendChild(applySpan);
+			td.appendChild(document.createTextNode("  "));
+			td.appendChild(deleteSpan);
+			currentTR.appendChild(td);
 	}
 
 }
