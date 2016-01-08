@@ -232,8 +232,20 @@ var SyncTable = function (initVar) {
 				if(i == PrimaryKeyColumnIndex && PrimaryKeyVisible == false){
 					continue;
 				}
-				createAndAppendTextBoxCell(data[d][i],tr,i);
+				switch(inputType[i]["type"].toString().toLowerCase()){
+					case "text":
+						createAndAppendTextBoxCell(data[d][i],tr,i);	
+					break;
+					case "dropdown":
+						createAndAppendDropdownCell(data[d][i],tr,i);
+					break;
+					default:
 
+						console.log("[CreateTableBody] Warning: Entered default condition with input: ");
+						console.log(inputType[i]);
+					break;
+				}
+					
 			}
 
 			createAndAppendActionCell(tr);
@@ -244,36 +256,64 @@ var SyncTable = function (initVar) {
 		var td = document.createElement("td");
 		var text = document.createElement("input");
 		text.setAttribute("type","input");
+		text.className = text.className + " form-control";
 		td.appendChild(text);
-		text.setAttribute("readonly",true);
+		//text.setAttribute("readonly",true);
 
 		if(dataTupleIndex != PrimaryKeyColumnIndex){
 
-			text.addEventListener("click",function(event){
-				this.removeAttribute("readonly");
-			});
-
-
+			//text.addEventListener("click",function(event){
+			//	this.removeAttribute("readonly");
+			//});
 			text.addEventListener("change",function(event){
-				//this.parentNode().paren;
 				var tRow = this;
 				tRow = getParentTR(tRow);
 				if(tRow == null)
 					return;
 				tRow.className = tRow.className + " success";
-				//changedRowTracker.push(tRow);
+				changedRowTracker[getRowId(tRow)] = tRow;
+				console.log(changedRowTracker);
+			});
+			//text.addEventListener("blur",function(){
+			//	this.setAttribute("readonly",true);	
+			//});
+			//td.setAttribute("onchange","alert();");
+
+		}
+		else{
+			text.setAttribute("readonly",true);
+		}
+		text.setAttribute("value",currentData);
+		currentTr.appendChild(td);
+	}
+
+	var createAndAppendDropdownCell = function(currentData,currentTr,dataTupleIndex){
+		var td  = document.createElement("td");
+		var select = document.createElement("select");
+		select.className = select.className + " form-control";
+
+		for(var val in inputType[dataTupleIndex]["options"]){
+			var option = document.createElement("option");
+			option.value = inputType[dataTupleIndex]["options"][val];
+			option.innerHTML = inputType[dataTupleIndex]["options"][val];
+			select.appendChild(option);
+		}
+
+		select.value = currentData;
+
+		select.addEventListener("change",function(event){
+				var tRow = this;
+				tRow = getParentTR(tRow);
+				if(tRow == null)
+					return;
+				tRow.className = tRow.className + " success";
 				changedRowTracker[getRowId(tRow)] = tRow;
 				console.log(changedRowTracker);
 			});
 
-			text.addEventListener("blur",function(){
-				this.setAttribute("readonly",true);	
-			});
-			//td.setAttribute("onchange","alert();");
-
-		}
-		text.setAttribute("value",currentData);
+		td.appendChild(select);
 		currentTr.appendChild(td);
+
 	}
 
 	var createAndAppendActionCell = function(currentTR){
